@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:async_playground_flutter/mocks/mock_baskets.dart';
 import 'package:async_playground_flutter/models/product.dart';
+import 'package:async_playground_flutter/utils/constants.dart';
 import 'package:rxdart/rxdart.dart';
 
 /// list of ten mock retail products of type Product
@@ -22,7 +24,7 @@ final mockProductsSubject = BehaviorSubject.seeded(initialMockProducts);
 /// Timer that runs every 5 seconds to update the stock and price
 /// of the products by using _initialProducts
 final mockProductsUpdated = Timer.periodic(
-  const Duration(seconds: 5),
+  productUpdateInterval,
   (timer) {
     final productsInStock =
         initialMockProducts.where((product) => product.stock > 0);
@@ -46,5 +48,8 @@ final mockProductsUpdated = Timer.periodic(
       );
     }).toList();
     mockProductsSubject.add(products);
+    /// update baskets with new product prices and stocks
+    mockBasketSubject.add(mockBasketSubject.value
+        .map((key, order) => MapEntry(key, order.updateProducts(products))));
   },
 );

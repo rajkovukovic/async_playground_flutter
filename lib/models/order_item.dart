@@ -15,4 +15,11 @@ class OrderItem {
   }
 
   double get total => product.price * quantity;
+
+  OrderItem copyWith({Product? product, int? quantity}) {
+    return OrderItem(
+      product: product ?? this.product,
+      quantity: quantity ?? this.quantity,
+    );
+  }
 }

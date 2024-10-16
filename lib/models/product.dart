@@ -12,7 +12,7 @@ class Product {
     required this.price,
     required this.stock,
     this.description,
-  }) : id = id ?? 'P-${_counter++}';
+  }) : id = id ?? 'P-${++_counter}';
 
   static var _counter = 0;
 
@@ -25,4 +25,11 @@ class Product {
       description: json['description'],
     );
   }
+
+  Product withoutDescription() => Product(
+        id: id,
+        name: name,
+        price: price,
+        stock: stock,
+      );
 }

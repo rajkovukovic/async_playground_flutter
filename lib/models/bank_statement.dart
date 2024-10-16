@@ -24,4 +24,18 @@ class BankStatement {
       ),
     );
   }
+
+  BankStatement copyWith({
+    String? id,
+    String? userId,
+    double? balance,
+    List<Expense>? expenses,
+  }) {
+    return BankStatement(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      balance: balance ?? this.balance,
+      expenses: expenses ?? this.expenses,
+    );
+  }
 }
