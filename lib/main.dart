@@ -1,7 +1,11 @@
 import 'package:async_playground_flutter/app.dart';
+import 'package:async_playground_flutter/mocks/mock_bank_statements.dart';
+import 'package:async_playground_flutter/mocks/mock_products.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  initMockProductChanges();
+  initMockBankExpensesGenerator();
   runApp(const MyApp());
 }
 

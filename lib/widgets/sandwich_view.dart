@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// SandwichView takes body as widget, header and footer as optional widgets
-/// and renders all in a card
+/// A stateless widget that renders a [body] inside a card, with optional [header] and [footer].
+/// Displays the provided widgets in a vertical layout, with the body taking up the remaining space.
+/// The static method [withList] allows rendering a list of items with custom item builders, along with optional header and footer.
 class SandwichView extends StatelessWidget {
   final Widget body;
   final Widget? header;

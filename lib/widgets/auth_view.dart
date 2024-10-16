@@ -2,15 +2,15 @@ import 'package:async_playground_flutter/mocks/mock_users.dart';
 import 'package:async_playground_flutter/models/user.dart';
 import 'package:flutter/material.dart';
 
-/// AuthView displays each user from [mockUsers] as a button with
-/// "Sign in {username}" text
-/// if AuthView property [authUserId] is not null
-/// button for that user becomes dark green and displays "Sign out {username}"
+/// Displays a list of users from [mockUsers] as sign-in buttons.
+/// If [authUserId] matches a user's ID, their button turns dark green
+/// and shows "Sign out {username}". Otherwise, it shows "Sign in {username}".
+/// Handles user sign-in and sign-out via [onUserSignedIn] and [onUserSignedOut] callbacks.
 class AuthView extends StatelessWidget {
   final List<User> users;
   final String? authUserId;
   final Function(User)? onUserSignedIn;
-  final Function()? onUserSignedOut;
+  final Function(User)? onUserSignedOut;
 
   const AuthView({
     super.key,
@@ -31,14 +31,15 @@ class AuthView extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () {
                 if (isAuthUser) {
-                  onUserSignedOut?.call();
+                  onUserSignedOut?.call(user);
                 } else {
                   onUserSignedIn?.call(user);
                 }
               },
               style: ButtonStyle(
-                backgroundColor:
-                    WidgetStateProperty.all(isAuthUser ? Colors.green : null),
+                backgroundColor: WidgetStateProperty.all(
+                  isAuthUser ? Colors.deepPurple.shade100 : null,
+                ),
               ),
               child: Text(isAuthUser
                   ? 'Sign out ${user.name}'

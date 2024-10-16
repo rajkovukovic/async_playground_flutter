@@ -4,46 +4,56 @@ import 'package:async_playground_flutter/mocks/mock_orders.dart';
 import 'package:async_playground_flutter/mocks/mock_users.dart';
 import 'package:async_playground_flutter/models/bank_statement.dart';
 import 'package:async_playground_flutter/models/expense.dart';
-import 'package:async_playground_flutter/utils/constants.dart';
+import 'package:async_playground_flutter/utils/delays.dart';
 import 'package:async_playground_flutter/utils/list_extension.dart';
 import 'package:rxdart/rxdart.dart';
 
 final mockBalances = {
-  '1': 1000.0,
-  '2': 2000.0,
+  '1': 3150.0,
+  '2': 5200.0,
 };
 
 final mockBankStatementsSubject = BehaviorSubject.seeded(_mockBankStatements);
 
-final _mockBankStatements = mockUsers
-    .map(
-      (user) => BankStatement(
-          id: 'statement_${user.id}',
-          userId: user.id,
-          balance: mockBalances[user.id] ?? 0,
-          expenses: mockOrdersSubject.value
-              .where((order) => order.userId == user.id)
-              .map((order) => Expense(
-                  id: 'expense_${order.id}',
-                  amount: order.total,
-                  description: 'Order ${order.id}',
-                  date: DateTime.now()
-                      .subtract(const Duration(days: 1, minutes: 30))))
-              .toList()),
+final _mockBankStatements = {
+  for (var user in mockUsers)
+    user.id: BankStatement(
+      id: 'statement_${user.id}',
+      userId: user.id,
+      balance: mockBalances[user.id] ?? 0,
+      expenses: mockOrdersSubject.value
+          .where((order) => order.userId == user.id)
+          .map((order) => Expense(
+              id: 'expense_${order.id}',
+              amount: order.total,
+              description: 'Order ${order.id}',
+              date: DateTime.now()
+                  .subtract(const Duration(days: 1, minutes: 30))))
+          .toList(),
     )
-    .toList();
+};
 
 /// periodically add a new expense to each user
-final mockBankStatementsUpdater = Timer.periodic(
-  expenseGeneratorInterval,
-  (timer) {
-    final updatedStatements = _mockBankStatements.map((statement) {
+void initMockBankExpensesGenerator() {
+  void generateBankExpenses([void _]) {
+    final updatedStatements =
+        mockBankStatementsSubject.value.map((key, statement) {
       final newExpense = _usualExpenses.randomElement;
-      return statement.copyWith(expenses: [...statement.expenses, newExpense]);
-    }).toList();
+
+      final updatedStatement = statement.copyWith(
+        expenses: [...statement.expenses, newExpense],
+        balance: statement.balance - newExpense.amount,
+      );
+
+      return MapEntry(key, updatedStatement);
+    });
     mockBankStatementsSubject.add(updatedStatements);
-  },
-);
+
+    Future.delayed(productUpdateInterval(), generateBankExpenses);
+  }
+
+  Future.delayed(productUpdateInterval(), generateBankExpenses);
+}
 
 final _usualExpenses = [
   Expense(

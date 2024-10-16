@@ -8,11 +8,11 @@ class BankStatement {
   final List<Expense> expenses;
 
   BankStatement({
-    required this.id,
+    String? id,
     required this.userId,
     required this.balance,
     required this.expenses,
-  });
+  }) : id = id ?? 'statement_$userId';
 
   factory BankStatement.fromJson(Map<String, dynamic> json) {
     return BankStatement(

@@ -1,7 +1,7 @@
 import 'package:async_playground_flutter/mocks/mock_products.dart';
 import 'package:async_playground_flutter/models/product.dart';
 import 'package:async_playground_flutter/types/callback.dart';
-import 'package:async_playground_flutter/utils/constants.dart';
+import 'package:async_playground_flutter/utils/delays.dart';
 
 class ProductService {
   /// Returns the product by id
@@ -9,7 +9,7 @@ class ProductService {
     String productId,
     Callback<Product?> callback,
   ) {
-    Future.delayed(apiCallDuration, () {
+    Future.delayed(apiCallDuration(), () {
       callback(
         null,
         mockProductsSubject.value
@@ -21,7 +21,7 @@ class ProductService {
 
   /// Returns the products without description
   static void getProductsCallback(Callback<List<Product>> callback) {
-    Future.delayed(apiCallDuration, () {
+    Future.delayed(apiCallDuration(), () {
       callback(
           null,
           mockProductsSubject.value
