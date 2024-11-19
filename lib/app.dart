@@ -128,7 +128,9 @@ class _AppState extends State<App> {
 
   void handleRemoveFromBasket(Product product) {
     if (loggedUser != null) {
-      pendingBasketProducts.add(product.id);
+      setState(() {
+        pendingBasketProducts.add(product.id);
+      });
 
       BasketService.removeFromBasketCallback(loggedUser!.id, product.id,
           (error, data) {
