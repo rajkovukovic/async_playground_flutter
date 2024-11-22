@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:async_playground_flutter/mocks/mock_users.dart';
 import 'package:async_playground_flutter/models/bank_statement.dart';
+import 'package:async_playground_flutter/models/coming_soon.dart';
 import 'package:async_playground_flutter/models/order.dart';
 import 'package:async_playground_flutter/models/product.dart';
 import 'package:async_playground_flutter/models/user.dart';
@@ -18,6 +19,7 @@ import 'package:async_playground_flutter/widgets/orders_view.dart';
 import 'package:async_playground_flutter/widgets/products_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
+import 'package:rxdart/rxdart.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -45,6 +47,8 @@ class _AppState extends State<App> {
   @override
   void initState() {
     super.initState();
+
+    fetchProducts();
     Timer.periodic(const Duration(seconds: 5), (timer) {
       fetchProducts();
       fetchBankStatement(loggedUser);
@@ -227,8 +231,30 @@ class _AppState extends State<App> {
     });
   }
 
+  List<Product> testComingSoon() {
+    return [Product(name: 'Test', price: 20, stock: 1)];
+  }
+
+  List<Product> testComingSoonFail() {
+    throw ErrorAndStackTrace(
+        Error(), StackTrace.fromString('ComingSoon failed'));
+  }
+
   @override
   Widget build(BuildContext context) {
+    ComingSoon(() {
+      //Change comment if you want to test fail for coming soon
+      return testComingSoon();
+      // return testComingSoonFail();
+    }).then((success) {
+      print('ComingSoon: 1');
+    }).then((test) {
+      print('ComingSoon: 2');
+    }).then((test) {
+      print('ComingSoon: 3');
+    }).catchError((error) {
+      print('ComingSoon: ${error.toString()}');
+    });
     return Scaffold(
       appBar: AppBar(
         title: AuthView(
