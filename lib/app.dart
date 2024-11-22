@@ -48,6 +48,41 @@ class _AppState extends State<App> {
   void initState() {
     super.initState();
 
+    // 00:01
+    // var authFuture = authViaUsernamePassword();
+
+    // 00:01
+    // var itemsFuture = authFuture.then((person) => fetchItems)
+
+    // 00:01
+    // var updatesFuture = authFuture.then((person) => fetchUpdates)
+
+    // 00:02
+    // authFuture resolves
+
+    // ComingSoon.promiseLikeConstructor((resolve, reject) => {
+    // Future.delayed(Duration(seconds: 1), () {
+    //   if (resolve) {
+    //     resolve([]);
+    //   } else {
+    //     reject('Failed to fetch products');
+    //   }
+    // }))
+
+    ComingSoon(() {
+      //Change comment if you want to test fail for coming soon
+      return testComingSoon();
+      // return testComingSoonFail();
+    }).then((success) {
+      print('ComingSoon: 1');
+    }).then((test) {
+      print('ComingSoon: 2');
+    }).then((test) {
+      print('ComingSoon: 3');
+    }).catchError((error) {
+      print('ComingSoon: ${error.toString()}');
+    });
+
     fetchProducts();
     Timer.periodic(const Duration(seconds: 5), (timer) {
       fetchProducts();
@@ -242,19 +277,6 @@ class _AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) {
-    ComingSoon(() {
-      //Change comment if you want to test fail for coming soon
-      return testComingSoon();
-      // return testComingSoonFail();
-    }).then((success) {
-      print('ComingSoon: 1');
-    }).then((test) {
-      print('ComingSoon: 2');
-    }).then((test) {
-      print('ComingSoon: 3');
-    }).catchError((error) {
-      print('ComingSoon: ${error.toString()}');
-    });
     return Scaffold(
       appBar: AppBar(
         title: AuthView(
