@@ -1,6 +1,7 @@
 class ComingSoon<T> {
   bool _completed = false;
-  Function(T value)? _resolvedValue;
+  final List<Function(T value)> _thenQueue = []; // [ mzaT, ianT ]
+  final List<Function(Object value)> _errorQueue = []; // [  mzaE ]
   T? _value;
   Object? _error;
 
@@ -12,24 +13,38 @@ class ComingSoon<T> {
     //500
     _value = value;
     _completed = true;
-    _resolvedValue?.call(value);
+
+    for (var el in _thenQueue) {
+      el.call(value);
+    }
+    _thenQueue.clear();
+    _errorQueue.clear();
   }
 
   _handleError(Object error) {
     _error = error;
     _completed = true;
+    for (var el in _errorQueue) {
+      el.call(error);
+    }
+    _thenQueue.clear();
+    _errorQueue.clear();
   }
 
   then(Function(T value) thenCallback) {
-    // 300
-    _resolvedValue = thenCallback;
     if (_completed) {
       thenCallback.call(_value as T);
+    } else {
+      _thenQueue.add(thenCallback);
     }
   }
 
-  catchError(Function(Object? error) callback) {
-    callback.call(_error);
+  catchError(Function(Object? error) errorCallback) {
+    if (_completed) {
+      errorCallback.call(_error as Object);
+    } else {
+      _errorQueue.add(errorCallback);
+    }
   }
 }
 
@@ -41,3 +56,9 @@ typedef Cb<T> = Function(
 //     resolve('foo');
 //   }, 300);
 // });
+
+var hugeObject = [];
+
+mboCallBack(error) {
+  print(hugeObject);
+}
