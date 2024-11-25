@@ -159,7 +159,18 @@ class _AppState extends State<App> {
     super.didUpdateWidget(oldWidget);
   }
 
-  void _fetchProducts() {
+  void _fetchProducts() async {
+    ComingSoon test = ProductService.getProductsComingSoon();
+
+    thenCallback(value) {
+      print('zika $value');
+    }
+
+    await Future.delayed(
+      const Duration(seconds: 2),
+    );
+    test.then(thenCallback); // 300ms
+
     ProductService.getProductsCallback(
       (error, result) {
         if (result != null && result.isNotEmpty) {
@@ -188,16 +199,12 @@ class _AppState extends State<App> {
   @override
   void initState() {
     _fetchProducts();
-    Timer.periodic(const Duration(seconds: 10), (t) => _fetchProducts());
+    Timer.periodic(const Duration(seconds: 60), (t) => _fetchProducts());
     super.initState();
   }
 
-  String? products;
-
   @override
   Widget build(BuildContext context) {
-
-
     return Scaffold(
       appBar: AppBar(
         title: AuthView(
@@ -267,7 +274,7 @@ class _AppState extends State<App> {
             onOrderSelected: showOrderDetails,
             onOrderDeselected: (_) => showOrderDetails(null),
           ).inGridArea('orders', key: const ValueKey('orders')),
-          const BankStatementView(
+          BankStatementView(
             pending: false,
             bankStatement: bankStatement,
           ).inGridArea('bank', key: const ValueKey('bank')),

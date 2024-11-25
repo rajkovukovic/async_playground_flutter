@@ -20,18 +20,21 @@ class ProductService {
     });
   }
 
-  static ComingSoon<List<Product>>? getProductsComingSoon() {
-    ComingSoon<List<Product>>? res = ComingSoon();
-    getProductsCallback(
-      (error, products) {
-        if (products != null) {
-          res.resolve(products);
-        } else {
-          res.reject(error ?? 'No products');
-        }
-      },
-    );
-    return res;
+  static ComingSoon<List<Product>> getProductsComingSoon() {
+    return ComingSoon((resolve, reject) {
+      // 300
+      getProductsCallback(
+        // 300
+        (error, products) {
+          if (products != null) {
+            // 500
+            resolve(products);
+          } else {
+            reject(error ?? 'No products');
+          }
+        },
+      );
+    });
   }
 
   /// Returns the products without description
