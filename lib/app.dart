@@ -10,6 +10,7 @@ import 'package:async_playground_flutter/services/bank_service.dart';
 import 'package:async_playground_flutter/services/basket_service.dart';
 import 'package:async_playground_flutter/services/order_service.dart';
 import 'package:async_playground_flutter/services/product_service.dart';
+import 'package:async_playground_flutter/types/coming_soon.dart';
 import 'package:async_playground_flutter/widgets/auth_view.dart';
 import 'package:async_playground_flutter/widgets/bank_statement_view.dart';
 import 'package:async_playground_flutter/widgets/basket_view.dart';
@@ -191,8 +192,12 @@ class _AppState extends State<App> {
     super.initState();
   }
 
+  String? products;
+
   @override
   Widget build(BuildContext context) {
+
+
     return Scaffold(
       appBar: AppBar(
         title: AuthView(
@@ -262,7 +267,7 @@ class _AppState extends State<App> {
             onOrderSelected: showOrderDetails,
             onOrderDeselected: (_) => showOrderDetails(null),
           ).inGridArea('orders', key: const ValueKey('orders')),
-          BankStatementView(
+          const BankStatementView(
             pending: false,
             bankStatement: bankStatement,
           ).inGridArea('bank', key: const ValueKey('bank')),
