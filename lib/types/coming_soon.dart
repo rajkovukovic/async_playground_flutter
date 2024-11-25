@@ -1,5 +1,3 @@
-import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
-
 class ComingSoon<T> {
   bool _completed = false;
   T? _value;
