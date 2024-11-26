@@ -44,6 +44,11 @@ class _AppState extends State<App> {
   User? loggedUser;
   BankStatement? bankStatement;
 
+  String? then1;
+  String? then2;
+  String? then3;
+  Object? error1;
+
   @override
   void initState() {
     super.initState();
@@ -71,16 +76,26 @@ class _AppState extends State<App> {
 
     ComingSoon(() {
       //Change comment if you want to test fail for coming soon
+      Future.delayed(Duration(seconds: 2), () {
+        print('FutureFinished');
+        return testComingSoon();
+      });
       return testComingSoon();
       // return testComingSoonFail();
-    }).then((success) {
-      print('ComingSoon: 1');
+    }).then((suc1) {
+      Future.delayed(Duration(seconds: 10), () {
+        then1 = 'Then1';
+      });
     }).then((test) {
-      print('ComingSoon: 2');
+      Future.delayed(Duration(seconds: 2), () {
+        then2 = 'Then2';
+      });
     }).then((test) {
-      print('ComingSoon: 3');
+      Future.delayed(Duration(seconds: 5), () {
+        then3 = 'Then3';
+      });
     }).catchError((error) {
-      print('ComingSoon: ${error.toString()}');
+      error1 = error;
     });
 
     fetchProducts();

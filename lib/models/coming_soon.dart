@@ -1,6 +1,6 @@
 class ComingSoon<T> {
-  Function(T)? _successCallback;
-  Function(Object)? _errorCallback;
+  final List<Function(T)> _successCallbacks = [];
+  final List<Function(Object)> _errorCallbacks = [];
   bool _completed = false;
   T? _result;
   Object? _error;
@@ -22,8 +22,9 @@ class ComingSoon<T> {
     if (_completed) throw StateError("Future is already completed.");
     _completed = true;
     _result = result;
-    if (_successCallback != null) {
-      _successCallback!(result);
+
+    for (var callback in _successCallbacks) {
+      callback(result);
     }
   }
 
@@ -31,13 +32,13 @@ class ComingSoon<T> {
     if (_completed) throw StateError("Future is already completed.");
     _completed = true;
     _error = error;
-    if (_errorCallback != null) {
-      _errorCallback!(error);
+    for (var callback in _errorCallbacks) {
+      callback(error);
     }
   }
 
   ComingSoon<T> then(void Function(T) callback) {
-    _successCallback = callback;
+    _successCallbacks.add(callback);
     if (_completed && _result != null) {
       callback(_result!);
     }
@@ -45,10 +46,19 @@ class ComingSoon<T> {
   }
 
   ComingSoon<T> catchError(void Function(Object) callback) {
-    _errorCallback = callback;
+    _errorCallbacks.add(callback);
     if (_completed && _error != null) {
       callback(_error!);
     }
     return this;
+  }
+
+  ComingSoon.promiseLike(
+      void Function(Function(T) resolve, Function(Object) reject) executor) {
+    try {
+      executor(_resolve, _reject);
+    } catch (error) {
+      _reject(error);
+    }
   }
 }
