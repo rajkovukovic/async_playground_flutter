@@ -4,8 +4,10 @@ class ComingSoon<T> {
   final List<Function(Object value)> _errorQueue = []; // [  mzaE ]
   T? _value;
   Object? _error;
+  ComingSoon? _newComingSoon;
 
-  ComingSoon(Cb<T> cb) {
+  ComingSoon(
+      Function(Function(T value) resolve, Function(Object obj) reject) cb) {
     cb(_handleSuccess, _handleError);
   }
 
@@ -31,12 +33,37 @@ class ComingSoon<T> {
     _errorQueue.clear();
   }
 
-  then(Function(T value) thenCallback) {
-    if (_completed) {
-      thenCallback.call(_value as T);
-    } else {
-      _thenQueue.add(thenCallback);
-    }
+  // ComingSoon<N> then<N>(Function(T value) thenCallback) {
+  //   if (_completed) {
+  //     thenCallback.call(_value as T);
+  //     return ComingSoon(
+  //       (resolve, reject) {},
+  //     );
+  //   } else {
+  //     _thenQueue.add(thenCallback);
+  //     return ComingSoon(
+  //       (resolve, reject) {},
+  //     );
+  //   }
+  // }
+
+  ComingSoon<N> then<N>(N Function(T value) thenCallback) {
+    return ComingSoon<N>((resolve, reject) {
+      if (_completed) {
+        if (_value != null) {
+          final result = thenCallback(_value as T);
+          resolve(result);
+        }
+      } else {
+        _thenQueue.add((value) {
+          final result = thenCallback(value);
+          resolve(result);
+        });
+      }
+      if (_error != null) {
+        reject(_error!);
+      }
+    });
   }
 
   catchError(Function(Object? error) errorCallback) {
@@ -46,19 +73,4 @@ class ComingSoon<T> {
       _errorQueue.add(errorCallback);
     }
   }
-}
-
-typedef Cb<T> = Function(
-    Function(T value) resolve, Function(Object obj) reject);
-
-// const promise1 = new Promise((resolve, reject) => {
-//   setTimeout(() => {
-//     resolve('foo');
-//   }, 300);
-// });
-
-var hugeObject = [];
-
-mboCallBack(error) {
-  print(hugeObject);
 }

@@ -5,6 +5,24 @@ import 'package:async_playground_flutter/types/coming_soon.dart';
 import 'package:async_playground_flutter/utils/delays.dart';
 
 class ProductService {
+  static ComingSoon<Product> getProductComingSoon(String productId) {
+    return ComingSoon(
+      (resolve, reject) {
+        Future.delayed(apiCallDuration(), () {
+          final product = mockProductsSubject.value
+              .where((product) => product.id == productId)
+              .firstOrNull;
+
+          if (product != null) {
+            resolve(product);
+          } else {
+            reject('No product');
+          }
+        });
+      },
+    );
+  }
+
   /// Returns the product by id
   static void getProductByIdCallback(
     String productId,
