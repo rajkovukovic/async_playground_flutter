@@ -160,37 +160,6 @@ class _AppState extends State<App> {
   }
 
   void _fetchProducts() async {
-    ComingSoon<List<Product>> test = ProductService.getProductsComingSoon();
-
-    // thenCallback(value) {
-    //   print('zika $value');
-    // }
-
-    ComingSoon<User> zika = AuthService.loginComingSoon('1').then(
-      (value) => value,
-    );
-
-    zika.then(
-      (value) {
-        ProductService.getProductComingSoon('P-${value.id}').then(
-          (pr) {
-            print('zika product ${pr.name}');
-            return pr;
-          },
-        );
-        return Product(name: 'Marko', price: 22, stock: 12);
-      },
-    ).then(
-      (value) {
-        print('zika 2 $value');
-      },
-    );
-
-    await Future.delayed(
-      const Duration(seconds: 2),
-    );
-    // test.then(thenCallback); // 300ms
-
     ProductService.getProductsCallback(
       (error, result) {
         if (result != null && result.isNotEmpty) {
