@@ -74,30 +74,6 @@ class _AppState extends State<App> {
     //   }
     // }))
 
-    ComingSoon(() {
-      //Change comment if you want to test fail for coming soon
-      Future.delayed(Duration(seconds: 2), () {
-        print('FutureFinished');
-        return testComingSoon();
-      });
-      return testComingSoon();
-      // return testComingSoonFail();
-    }).then((suc1) {
-      Future.delayed(Duration(seconds: 10), () {
-        then1 = 'Then1';
-      });
-    }).then((test) {
-      Future.delayed(Duration(seconds: 2), () {
-        then2 = 'Then2';
-      });
-    }).then((test) {
-      Future.delayed(Duration(seconds: 5), () {
-        then3 = 'Then3';
-      });
-    }).catchError((error) {
-      error1 = error;
-    });
-
     fetchProducts();
     Timer.periodic(const Duration(seconds: 5), (timer) {
       fetchProducts();
@@ -279,15 +255,6 @@ class _AppState extends State<App> {
       basket = null;
       bankStatement = null;
     });
-  }
-
-  List<Product> testComingSoon() {
-    return [Product(name: 'Test', price: 20, stock: 1)];
-  }
-
-  List<Product> testComingSoonFail() {
-    throw ErrorAndStackTrace(
-        Error(), StackTrace.fromString('ComingSoon failed'));
   }
 
   @override

@@ -37,20 +37,48 @@ class ComingSoon<T> {
     }
   }
 
-  ComingSoon<T> then(void Function(T) callback) {
-    _successCallbacks.add(callback);
-    if (_completed && _result != null) {
-      callback(_result!);
-    }
-    return this;
+  ComingSoon<R> then<R>(R Function(T) callback) {
+    return ComingSoon<R>.promiseLike((resolve, reject) {
+      _successCallbacks.add((result) {
+        try {
+          final nextResult = callback(result);
+          resolve(nextResult);
+        } catch (error) {
+          reject(error);
+        }
+      });
+
+      if (_completed && _result != null) {
+        try {
+          final nextResult = callback(_result!);
+          resolve(nextResult);
+        } catch (error) {
+          reject(error);
+        }
+      }
+    });
   }
 
-  ComingSoon<T> catchError(void Function(Object) callback) {
-    _errorCallbacks.add(callback);
-    if (_completed && _error != null) {
-      callback(_error!);
-    }
-    return this;
+  ComingSoon<T> catchError(T Function(Object) callback) {
+    return ComingSoon<T>.promiseLike((resolve, reject) {
+      _errorCallbacks.add((error) {
+        try {
+          final nextResult = callback(error);
+          resolve(nextResult);
+        } catch (newError) {
+          reject(newError);
+        }
+      });
+
+      if (_completed && _error != null) {
+        try {
+          final nextResult = callback(_error!);
+          resolve(nextResult);
+        } catch (newError) {
+          reject(newError);
+        }
+      }
+    });
   }
 
   ComingSoon.promiseLike(
