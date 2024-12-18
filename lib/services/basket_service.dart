@@ -11,26 +11,22 @@ import 'package:async_playground_flutter/mocks/mock_products.dart';
 import 'package:async_playground_flutter/utils/delays.dart';
 
 class BasketService {
-  /// Get the basket for the user
   static ComingSoon<Order?> getBasketCallback(String userId) {
     return ComingSoon<Order?>((resolve, reject) {
-      // Simulate the delay for the API call
       Future.delayed(apiCallDuration(), () {
         _updateBasketsWithLatestProducts();
         final basket = mockBasketSubject.value[userId];
-        resolve(basket); // Resolve with the basket or null if not found
+        resolve(basket);
       });
     });
   }
 
-  /// Insert or Update product in the basket
   static ComingSoon<Order> upsertBasketCallback(
     String userId,
     Product product,
     int quantity,
   ) {
     return ComingSoon<Order>((resolve, reject) {
-      // Simulate the delay for the API call
       Future.delayed(apiCallDuration(), () {
         final order =
             mockBasketSubject.value[userId] ?? Order(items: [], userId: userId);
@@ -43,23 +39,20 @@ class BasketService {
         mockBasketSubject.value[userId] = updatedOrder;
         mockBasketSubject.add(mockBasketSubject.value);
         _updateBasketsWithLatestProducts();
-        resolve(updatedOrder); // Resolve with the updated order
+        resolve(updatedOrder);
       });
     });
   }
 
-  /// Remove product from the basket
   static ComingSoon<Order> removeFromBasketCallback(
     String userId,
     String productId,
   ) {
     return ComingSoon<Order>((resolve, reject) {
-      // Simulate the delay for the API call
       Future.delayed(apiCallDuration(), () {
         final order = mockBasketSubject.value[userId];
         if (order == null) {
-          reject(
-              'Basket not found'); // Reject with an error if the basket is not found
+          reject('Basket not found');
         } else {
           final updatedItems = order.items
               .where((item) => item.product.id != productId)
@@ -89,23 +82,16 @@ class BasketService {
     mockBasketSubject.add(updatedBaskets);
   }
 
-  /// Places order in basket for the user and removes all items from the basket
-  /// Returns the order placed
-  /// User's basket will be null after this call
   static ComingSoon<Order> placeOrderFromBasketCallback(String userId) {
     return ComingSoon<Order>((resolve, reject) {
-      // Simulate the delay for the API call
       Future.delayed(apiCallDuration(), () {
         final order = mockBasketSubject.value[userId];
         if (order == null || order.isEmpty) {
-          reject('Basket is empty'); // Reject if the basket is empty
+          reject('Basket is empty');
         } else {
-          // Update basket
           mockBasketSubject.value.remove(userId);
           mockBasketSubject.add(mockBasketSubject.value);
-          // Update orders
           mockOrdersSubject.add([...mockOrdersSubject.value, order]);
-          // Update bank statements
           final bankStatement = mockBankStatementsSubject.value[userId] ??
               BankStatement(userId: userId, balance: 0, expenses: []);
           final updatedStatement = bankStatement.copyWith(
@@ -125,7 +111,7 @@ class BasketService {
             ...mockBankStatementsSubject.value,
             userId: updatedStatement,
           });
-          resolve(order); // Resolve with the placed order
+          resolve(order);
         }
       });
     });

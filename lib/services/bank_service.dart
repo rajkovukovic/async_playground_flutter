@@ -6,7 +6,6 @@ import 'package:async_playground_flutter/utils/delays.dart';
 class BankService {
   static ComingSoon<BankStatement> getStatementCallback(String userId) {
     return ComingSoon<BankStatement>((resolve, reject) {
-      // Simulate the delay for an API call
       Future.delayed(apiCallDuration(), () {
         final statement = mockBankStatementsSubject.value[userId];
         if (statement != null) {

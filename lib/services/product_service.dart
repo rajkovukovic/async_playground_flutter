@@ -20,7 +20,6 @@ class ProductService {
     });
   }
 
-  /// Returns the products without description using ComingSoon
   static ComingSoon<List<Product>> getProducts() {
     return ComingSoon<List<Product>>((resolve, reject) {
       Future.delayed(apiCallDuration(), () {
