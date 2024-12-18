@@ -5,14 +5,14 @@ class ComingSoon<T> {
   T? _result;
   Object? _error;
 
-  ComingSoon(Function() operation) {
+  ComingSoon(void Function(Function(T), Function(Object)) operation) {
     _executeOperation(operation);
   }
 
-  void _executeOperation(Function() operation) {
+  void _executeOperation(
+      void Function(Function(T), Function(Object)) operation) {
     try {
-      T result = operation() as T;
-      _resolve(result);
+      operation(_resolve, _reject);
     } catch (error) {
       _reject(error);
     }
@@ -37,12 +37,17 @@ class ComingSoon<T> {
     }
   }
 
-  ComingSoon<R> then<R>(R Function(T) callback) {
-    return ComingSoon<R>.promiseLike((resolve, reject) {
+  ComingSoon<R> then<R>(dynamic Function(T) callback) {
+    var nextComingSoon = ComingSoon<R>((resolve, reject) {
       _successCallbacks.add((result) {
         try {
-          final nextResult = callback(result);
-          resolve(nextResult);
+          final value = callback(result);
+          if (value is ComingSoon<R>) {
+            value._successCallbacks.add(resolve);
+            value._errorCallbacks.add(reject);
+          } else {
+            resolve(value);
+          }
         } catch (error) {
           reject(error);
         }
@@ -50,21 +55,33 @@ class ComingSoon<T> {
 
       if (_completed && _result != null) {
         try {
-          final nextResult = callback(_result!);
-          resolve(nextResult);
+          final value = callback(_result!);
+          if (value is ComingSoon<R>) {
+            value._successCallbacks.add(resolve);
+            value._errorCallbacks.add(reject);
+          } else {
+            resolve(value);
+          }
         } catch (error) {
           reject(error);
         }
       }
     });
+
+    return nextComingSoon;
   }
 
-  ComingSoon<T> catchError(T Function(Object) callback) {
-    return ComingSoon<T>.promiseLike((resolve, reject) {
+  ComingSoon<T> catchError(dynamic Function(Object) callback) {
+    var nextComingSoon = ComingSoon<T>((resolve, reject) {
       _errorCallbacks.add((error) {
         try {
-          final nextResult = callback(error);
-          resolve(nextResult);
+          final value = callback(error);
+          if (value is ComingSoon<T>) {
+            value._successCallbacks.add(resolve);
+            value._errorCallbacks.add(reject);
+          } else {
+            resolve(value);
+          }
         } catch (newError) {
           reject(newError);
         }
@@ -72,21 +89,19 @@ class ComingSoon<T> {
 
       if (_completed && _error != null) {
         try {
-          final nextResult = callback(_error!);
-          resolve(nextResult);
+          final value = callback(_error!);
+          if (value is ComingSoon<T>) {
+            value._successCallbacks.add(resolve);
+            value._errorCallbacks.add(reject);
+          } else {
+            resolve(value);
+          }
         } catch (newError) {
           reject(newError);
         }
       }
     });
-  }
 
-  ComingSoon.promiseLike(
-      void Function(Function(T) resolve, Function(Object) reject) executor) {
-    try {
-      executor(_resolve, _reject);
-    } catch (error) {
-      _reject(error);
-    }
+    return nextComingSoon;
   }
 }

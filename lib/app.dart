@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:async_playground_flutter/mocks/mock_users.dart';
 import 'package:async_playground_flutter/models/bank_statement.dart';
-import 'package:async_playground_flutter/models/coming_soon.dart';
 import 'package:async_playground_flutter/models/order.dart';
 import 'package:async_playground_flutter/models/product.dart';
 import 'package:async_playground_flutter/models/user.dart';
@@ -11,7 +10,6 @@ import 'package:async_playground_flutter/services/bank_service.dart';
 import 'package:async_playground_flutter/services/basket_service.dart';
 import 'package:async_playground_flutter/services/order_service.dart';
 import 'package:async_playground_flutter/services/product_service.dart';
-import 'package:async_playground_flutter/types/callback.dart';
 import 'package:async_playground_flutter/widgets/auth_view.dart';
 import 'package:async_playground_flutter/widgets/bank_statement_view.dart';
 import 'package:async_playground_flutter/widgets/basket_view.dart';
@@ -19,7 +17,6 @@ import 'package:async_playground_flutter/widgets/orders_view.dart';
 import 'package:async_playground_flutter/widgets/products_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_layout_grid/flutter_layout_grid.dart';
-import 'package:rxdart/rxdart.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -53,27 +50,6 @@ class _AppState extends State<App> {
   void initState() {
     super.initState();
 
-    // 00:01
-    // var authFuture = authViaUsernamePassword();
-
-    // 00:01
-    // var itemsFuture = authFuture.then((person) => fetchItems)
-
-    // 00:01
-    // var updatesFuture = authFuture.then((person) => fetchUpdates)
-
-    // 00:02
-    // authFuture resolves
-
-    // ComingSoon.promiseLikeConstructor((resolve, reject) => {
-    // Future.delayed(Duration(seconds: 1), () {
-    //   if (resolve) {
-    //     resolve([]);
-    //   } else {
-    //     reject('Failed to fetch products');
-    //   }
-    // }))
-
     fetchProducts();
     Timer.periodic(const Duration(seconds: 5), (timer) {
       fetchProducts();
@@ -86,12 +62,12 @@ class _AppState extends State<App> {
     setState(() {
       pendingProd = true;
     });
-    ProductService.getProductsCallback((error, data) {
-      if (data != null) {
-        setState(() {
-          products = data;
-        });
-      }
+    ProductService.getProducts().then((data) {
+      setState(() {
+        products = data;
+      });
+    }).catchError((error) {
+      debugPrint('Error: $error');
     });
     setState(() {
       pendingProd = false;
@@ -100,12 +76,12 @@ class _AppState extends State<App> {
 
   void showProductDetails(Product? product) {
     if (product != null) {
-      ProductService.getProductByIdCallback(product.id, (error, data) {
-        if (data != null) {
-          setState(() {
-            selectedProduct = data;
-          });
-        }
+      ProductService.getProductById(product.id).then((product) {
+        setState(() {
+          selectedProduct = product;
+        });
+      }).catchError((error) {
+        debugPrint('Error: $error');
       });
     } else {
       setState(() {
@@ -116,12 +92,12 @@ class _AppState extends State<App> {
 
   void showOrderDetails(Order? order) {
     if (order != null) {
-      OrderService.getOrderByIdCallback(order.id, (error, data) {
-        if (data != null) {
-          setState(() {
-            selectedOrder = data;
-          });
-        }
+      OrderService.getOrderById(order.id).then((order) {
+        setState(() {
+          selectedOrder = order;
+        });
+      }).catchError((error) {
+        debugPrint('Error: $error');
       });
     } else {
       setState(() {
@@ -145,14 +121,14 @@ class _AppState extends State<App> {
               ?.quantity ??
           0;
 
-      BasketService.upsertBasketCallback(loggedUser!.id, product, quantity + 1,
-          (error, data) {
+      BasketService.upsertBasketCallback(loggedUser!.id, product, quantity + 1)
+          .then((data) {
         setState(() {
           basket = data;
           pendingProducts.remove(product.id);
           pendingBasket = false;
         });
-      });
+      }).catchError((error) => debugPrint('Error:$error'));
     }
   }
 
@@ -162,26 +138,24 @@ class _AppState extends State<App> {
         pendingBasketProducts.add(product.id);
       });
 
-      BasketService.removeFromBasketCallback(loggedUser!.id, product.id,
-          (error, data) {
+      BasketService.removeFromBasketCallback(loggedUser!.id, product.id)
+          .then((data) {
         setState(() {
           basket = data;
           pendingBasketProducts.remove(product.id);
         });
-      });
+      }).catchError((error) => debugPrint('Error:$error'));
     }
   }
 
   void handlePlaceOrder() {
     if (loggedUser != null) {
-      BasketService.placeOrderFromBasketCallback(loggedUser!.id, (error, data) {
-        if (data != null) {
-          setState(() {
-            basket = null;
-            orders.add(data);
-          });
-        }
-      });
+      BasketService.placeOrderFromBasketCallback(loggedUser!.id).then((data) {
+        setState(() {
+          basket = null;
+          orders.add(data);
+        });
+      }).catchError((error) => debugPrint('Error:$error'));
     }
   }
 
@@ -190,12 +164,12 @@ class _AppState extends State<App> {
       setState(() {
         pendingBank = true;
       });
-      BankService.getStatementCallback(user.id, (error, data) {
-        if (data != null) {
-          setState(() {
-            bankStatement = data;
-          });
-        }
+      BankService.getStatementCallback(user.id).then((statement) {
+        setState(() {
+          bankStatement = statement;
+        });
+      }).catchError((error) {
+        debugPrint('Error: $error');
       });
       setState(() {
         pendingBank = false;
@@ -208,11 +182,14 @@ class _AppState extends State<App> {
       setState(() {
         pendingBasket = true;
       });
-      BasketService.getBasketCallback(user.id, (error, data) {
+      BasketService.getBasketCallback(user.id).then((value) {
         setState(() {
-          basket = data;
+          basket = value;
         });
+      }).catchError((error) {
+        debugPrint('Error: $error');
       });
+
       setState(() {
         pendingBasket = false;
       });
@@ -224,10 +201,12 @@ class _AppState extends State<App> {
       setState(() {
         pendingOrders = true;
       });
-      OrderService.getOrdersCallback(user.id, (error, data) {
+      OrderService.getOrders(user.id).then((value) {
         setState(() {
-          orders = data ?? [];
+          orders = value;
         });
+      }).catchError((error) {
+        debugPrint('Error: $error');
       });
       setState(() {
         pendingOrders = false;
@@ -238,14 +217,19 @@ class _AppState extends State<App> {
   void logIn(User user) {
     logOut();
 
-    AuthService.loginCallback(user.id, (error, data) {
+    AuthService.loginCallback(user.id).then((user) {
       setState(() {
-        loggedUser = data;
+        loggedUser = user;
       });
+    }).then((val) {
+      fetchBankStatement(loggedUser);
+    }).then((val) {
+      fetchBasket(loggedUser);
+    }).then((val) {
+      fetchOrders(loggedUser);
+    }).catchError((error) {
+      debugPrint('Error: $error');
     });
-    fetchBasket(user);
-    fetchOrders(user);
-    fetchBankStatement(user);
   }
 
   void logOut() {
