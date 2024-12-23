@@ -133,31 +133,61 @@ void main() {
       });
     });
 
-    test('Chains multiple then calls with Future.delayed', () {
-      String result = "";
-      Completer<void> completer = Completer<void>();
+    test('ComingSoon.delayed works as expected', () async {
+      final startAt = DateTime.now();
+      DateTime? finishAt1;
+      DateTime? finishAt2;
 
-      ComingSoon<int>((resolve, reject) {
+      final cs1 = ComingSoon.delayed(const Duration(seconds: 1), () {
+        finishAt1 = DateTime.now();
+        return 1;
+      });
+
+      final cs2 = ComingSoon.delayed(const Duration(seconds: 2), () {
+        finishAt2 = DateTime.now();
+        return 2;
+      });
+
+      final result1 = await cs1.asFuture();
+      final result2 = await cs2.asFuture();
+
+      expect(result1, 1);
+      expect(result2, 2);
+      expect(result1, isNotNull);
+      expect(result2, isNotNull);
+
+      final delta1 = finishAt1!.difference(startAt).inMilliseconds - 1000;
+      final delta2 = finishAt2!.difference(startAt).inMilliseconds - 2000;
+      expect(delta1.abs(), lessThan(50));
+      expect(delta2.abs(), lessThan(50));
+    });
+
+    test('Chains multiple then calls with Future.delayed', () async {
+      final chainedCS = ComingSoon<int>((resolve, reject) {
         resolve(10);
       }).then((value) {
-        Future.delayed(const Duration(seconds: 5), () {
-          "$value -> After 5 seconds";
+        ComingSoon.delayed(const Duration(seconds: 2), () {
+          print("$value -> After 2 seconds");
+          return "$value -> After 2 seconds";
         });
       }).then((value) {
-        Future.delayed(const Duration(seconds: 1), () {
-          "$value -> After 1 second";
+        ComingSoon.delayed(const Duration(seconds: 1), () {
+          print("$value -> After 1 second");
+          return "$value -> After 1 second";
         });
       }).then((value) {
-        Future.delayed(const Duration(seconds: 4), () {
-          result = "$value -> Final result";
-          completer.complete();
+        ComingSoon.delayed(const Duration(seconds: 2), () {
+          print("$value -> Final result");
+          return "$value -> Final result";
         });
       });
 
-      completer.future.then((_) {
-        expect(result,
-            equals("10 -> After 5 seconds -> After 1 second -> Final result"));
-      });
+      final result = await chainedCS.asFuture();
+
+      expect(
+        result,
+        equals("10 -> After 5 seconds -> After 1 second -> Final result"),
+      );
     });
   });
 }

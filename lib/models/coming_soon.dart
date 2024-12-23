@@ -1,3 +1,5 @@
+import 'dart:async';
+
 class ComingSoon<T> {
   final List<Function(T)> _successCallbacks = [];
   final List<Function(Object)> _errorCallbacks = [];
@@ -103,5 +105,21 @@ class ComingSoon<T> {
     });
 
     return nextComingSoon;
+  }
+
+  Future<T> asFuture() {
+    final completer = Completer<T>();
+    this.then((v) => completer.complete(v));
+    this.catchError((error) => completer.completeError(error));
+    return completer.future;
+  }
+
+  static ComingSoon<T> delayed<T>(
+    Duration duration, [
+    T Function()? computation,
+  ]) {
+    return ComingSoon((resolve, reject) {
+      Future.delayed(duration, computation).then(resolve).catchError(reject);
+    });
   }
 }
