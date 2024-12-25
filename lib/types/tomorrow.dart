@@ -1,9 +1,10 @@
 import 'dart:async';
 
 class Tomorrow<T> {
-  bool? _completed;
+  bool _completed = false;
   T? _value;
   Function(T waitValue)? waitFunction;
+  Function(Object error)? waitForError;
   Object? error;
 
   Tomorrow(
@@ -38,7 +39,11 @@ class Tomorrow<T> {
           dynamic secondTomorrow = callerFn(waitedValue);
 
           if (secondTomorrow is Tomorrow) {
-            // secondTomorrow
+            secondTomorrow.then(
+              (value) {
+                resolve2.call(value);
+              },
+            );
           } else {
             resolve2.call(secondTomorrow);
           }
@@ -47,5 +52,25 @@ class Tomorrow<T> {
     );
   }
 
-  catchError(Object error) {}
+  Tomorrow<N> catchError<N>(Function(Object? error) errorCallback) {
+    return Tomorrow<N>(
+      (resolve, reject) {
+        if (_completed) {
+          try {
+            errorCallback(error);
+          } catch (newError) {
+            reject(newError);
+          }
+        } else {
+          waitForError = (error) {
+            try {
+              reject(error);
+            } catch (newError) {
+              reject(newError);
+            }
+          };
+        }
+      },
+    );
+  }
 }

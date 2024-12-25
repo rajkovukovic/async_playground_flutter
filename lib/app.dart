@@ -196,6 +196,12 @@ class _AppState extends State<App> {
     }).then(
       (value) {
         print('zika test $value');
+
+        return 'String again';
+      },
+    ).then(
+      (value) {
+        print('zika final $value');
       },
     );
 
