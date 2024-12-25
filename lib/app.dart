@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 
 import 'package:async_playground_flutter/mocks/mock_users.dart';
@@ -10,6 +12,7 @@ import 'package:async_playground_flutter/services/bank_service.dart';
 import 'package:async_playground_flutter/services/basket_service.dart';
 import 'package:async_playground_flutter/services/order_service.dart';
 import 'package:async_playground_flutter/services/product_service.dart';
+import 'package:async_playground_flutter/types/tomorrow.dart';
 import 'package:async_playground_flutter/widgets/auth_view.dart';
 import 'package:async_playground_flutter/widgets/bank_statement_view.dart';
 import 'package:async_playground_flutter/widgets/basket_view.dart';
@@ -186,7 +189,17 @@ class _AppState extends State<App> {
 
   @override
   void initState() {
-    _fetchProducts();
+    Tomorrow.delayed(const Duration(seconds: 8), 'marko').then((value) {
+      print(value);
+
+      return Tomorrow.delayed(const Duration(seconds: 2), 123);
+    }).then(
+      (value) {
+        print('zika test $value');
+      },
+    );
+
+    // _fetchProducts();
     Timer.periodic(const Duration(seconds: 10), (t) => _fetchProducts());
     super.initState();
   }

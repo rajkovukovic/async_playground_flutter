@@ -29,7 +29,6 @@ class BasketView extends StatelessWidget {
 
   @override
   Widget build(Object context) {
-    print('zika rebuild ');
     return SandwichView.withList(
       header: ListTileWithPrice(
         title: basket == null || basket!.itemCount == 0
