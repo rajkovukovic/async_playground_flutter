@@ -40,13 +40,12 @@ class ComingSoon<T> {
   }
 
   ComingSoon<R> then<R>(dynamic Function(T) callback) {
-    var nextComingSoon = ComingSoon<R>((resolve, reject) {
+    return ComingSoon<R>((resolve, reject) {
       _successCallbacks.add((result) {
         try {
           final value = callback(result);
           if (value is ComingSoon<R>) {
-            value._successCallbacks.add(resolve);
-            value._errorCallbacks.add(reject);
+            value.then(resolve).catchError(reject);
           } else {
             resolve(value);
           }
@@ -59,8 +58,7 @@ class ComingSoon<T> {
         try {
           final value = callback(_result!);
           if (value is ComingSoon<R>) {
-            value._successCallbacks.add(resolve);
-            value._errorCallbacks.add(reject);
+            value.then(resolve).catchError(reject);
           } else {
             resolve(value);
           }
@@ -68,9 +66,12 @@ class ComingSoon<T> {
           reject(error);
         }
       }
-    });
 
-    return nextComingSoon;
+      _errorCallbacks.add(reject);
+      if (_completed && _error != null) {
+        reject(_error!);
+      }
+    });
   }
 
   ComingSoon<T> catchError(dynamic Function(Object) callback) {

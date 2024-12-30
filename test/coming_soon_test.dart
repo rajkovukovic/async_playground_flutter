@@ -14,12 +14,12 @@ void main() {
       ComingSoon<String>((resolve, reject) {
         resolve("Result");
       }).then((value) {
-        "$value -> Then 1";
+        return "$value -> Then 1";
       }).then((value) {
-        "$value -> Then 2";
+        return "$value -> Then 2";
       }).then((value) {
-        result = value;
         completer.complete();
+        return result = value;
       });
 
       completer.future.then((_) {
@@ -166,17 +166,17 @@ void main() {
       final chainedCS = ComingSoon<int>((resolve, reject) {
         resolve(10);
       }).then((value) {
-        ComingSoon.delayed(const Duration(seconds: 2), () {
+        return ComingSoon.delayed(const Duration(seconds: 2), () {
           print("$value -> After 2 seconds");
           return "$value -> After 2 seconds";
         });
       }).then((value) {
-        ComingSoon.delayed(const Duration(seconds: 1), () {
+        return ComingSoon.delayed(const Duration(seconds: 1), () {
           print("$value -> After 1 second");
           return "$value -> After 1 second";
         });
       }).then((value) {
-        ComingSoon.delayed(const Duration(seconds: 2), () {
+        return ComingSoon.delayed(const Duration(seconds: 2), () {
           print("$value -> Final result");
           return "$value -> Final result";
         });
